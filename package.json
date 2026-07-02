@@ -1,0 +1,13 @@
+{
+  "name": "ailoveyou",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smugmug:auth": "node scripts/smugmug-auth.mjs",
+    "daily:generate": "node scripts/generate-daily.mjs"
+  },
+  "dependencies": {
+    "oauth-1.0a": "^2.2.6",
+    "sharp": "^0.35.3"
+  }
+}

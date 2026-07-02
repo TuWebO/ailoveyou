@@ -11,25 +11,38 @@
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <style>
   body, html {
-    height: 100%;
     margin: 0;
     font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     text-align: center;
     background-color: #f8f8f8;
   }
 
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
   header {
     width: 100%;
-    padding: 10px 0;
+    box-sizing: border-box;
+    padding: 10px 20px;
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .header-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
   }
 
   .header-title {
@@ -38,14 +51,10 @@
   }
 
   .container {
+    flex: 1;
     max-width: 600px;
-    margin-top: 80px; /* Adjusted margin to account for the fixed header */
-  }
-
-  .logo {
-    width: 50%;
-    margin: 0 auto;
-    border-radius: 50%; /* Circular logo */
+    margin: 70px auto 0; /* Adjusted margin to account for the fixed header */
+    padding: 0 20px 60px;
   }
 
   .slogan {
@@ -54,21 +63,43 @@
     color: #333;
   }
 
-  @media (max-width: 600px) {
-    .logo {
-      width: 80%;
-    }
+  .daily-photo {
+    max-width: 100%;
+    margin-top: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
   }
+
+  .daily-caption {
+    margin-top: 16px;
+    font-size: 1.05em;
+    font-style: italic;
+    color: #555;
+  }
+
+  footer {
+    padding: 20px 16px 32px;
+    color: #999;
+    font-size: 0.85em;
+    border-top: 1px solid #e5e5e5;
+  }
+
 </style>
 </head>
 <body>
 <header>
+  <img src="images/ailoveyou-logo.png" alt="AiLoveYou.ai Logo" class="header-logo">
   <div class="header-title">AiLoveYou</div>
 </header>
 <div class="container">
-  <img src="images/ailoveyou-logo.png" alt="AiLoveYou.ai Logo" class="logo">
   <div class="slogan">Hey, I love you.</div>
-  <p lang="es">Pedimos que los primos y los sobrinos puedan tener una mesa de ping pong. La infancia no se puede perder.</p>
+  <!-- DAILY:START -->
+  <img src="images/daily/today.jpg?v=2026-07-02" alt="Today's photo" class="daily-photo">
+  <div class="daily-caption">Golden light spills over rooftops and rolling hills as surfers drift together in the tide, quietly bound by the sea's gentle rhythm.</div>
+  <!-- DAILY:END -->
 </div>
+<footer>
+  <p>AiLoveYou.ai &mdash; a little love, every day.</p>
+</footer>
 </body>
 </html>

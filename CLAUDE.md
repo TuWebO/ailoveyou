@@ -17,13 +17,23 @@ Static site on GitHub Pages (repo `TuWebO/ailoveyou`), custom domain **`ailoveyo
 ## Daily pipeline
 
 `scripts/generate-daily.mjs` (invoked by the workflow above):
-1. Picks a day-indexed photo from SmugMug album key `6v3DvK` ("Stock", owner-accessible, password-protected but readable via OAuth 1.0a owner token in `scripts/smugmug-client.mjs`).
-2. Downloads the unwatermarked `Original` size, resizes/compresses locally with `sharp` (SmugMug has no reliable API-level "smaller but unwatermarked" size).
+1. Picks the next not-yet-used photo from SmugMug album key `6v3DvK` ("Stock", owner-accessible, password-protected but readable via OAuth 1.0a owner token in `scripts/smugmug-client.mjs`), tracked by SmugMug `ImageKey` in `rotation-state.json` (resets once every photo has had a turn). Reruns on the same date reuse whatever was already picked that day rather than drawing again — deliberately *not* a `day % albumSize` index, since that reshuffles every future pick whenever the album's photo count changes.
+2. Downloads the unwatermarked `Original` size, resizes/compresses locally with `sharp` (SmugMug has no reliable API-level "smaller but unwatermarked" size), then embeds a `Copyright`/`Artist` EXIF tag (tusesiondesurf.com) into the already-stripped buffer — verified empirically this never leaks the original photo's GPS/lens/serial EXIF.
 3. Sends it to Claude for a one-sentence caption.
 4. Writes `images/daily/YYYY-MM-DD.jpg`, rewrites `index.html` between `<!-- DAILY:START/END -->` (photo + caption) and `<!-- SEO:START/END -->` (og/twitter description + og:description use that day's caption; `og:image`/`twitter:image` point at the fixed `images/ailoveyou-share.jpg`, not the rotating photo — cached link previews would otherwise get stuck on a stale photo).
-5. Appends to `daily-log.json` (date, image path, caption, width, height) and fully regenerates `archive.html` from that log.
+5. Appends to `daily-log.json` (date, image path, SmugMug `imageKey`, caption, width, height) and fully regenerates `archive.html` from that log.
 
 `images/ailoveyou-share.jpg` (1200x630, "Hey, I love you." + site name baked in) is the fixed social-share image — not touched by the pipeline, edit it manually if it ever needs to change.
+
+## Instagram publishing
+
+`scripts/post-instagram.mjs` runs as a separate workflow step *after* the commit+push, posting that day's photo/caption to `@ailoveyou_ai` via the Instagram Graph API (`graph.instagram.com`, "Instagram API with Instagram Login" method — no linked Facebook Page needed). Needs `INSTAGRAM_ACCESS_TOKEN` (long-lived, expires every 60 days — must be refreshed manually or via `graph.instagram.com/refresh_access_token` before then, or posting silently stops working) and `INSTAGRAM_USER_ID` as repo secrets.
+
+Why it's a separate step, not folded into `generate-daily.mjs`: Instagram's `image_url` param must be a URL it can fetch *right when the API is called*, but the image isn't actually live on `ailoveyou.ai` until after the push and the (occasionally flaky, see below) Pages redeploy finish. So this script polls the live URL with a bounded retry/timeout before calling Instagram's API, and the workflow step has `continue-on-error: true` — a failure here (expired token, transient API error) must never block the site's own daily update, since Instagram is a side-channel, not the core thing.
+
+Duplicate-post guard: the script checks `daily-log.json`'s `instagramMediaId` field for today's entry before posting, and skips if already set — necessary because reruns on the same date (e.g. manual `workflow_dispatch` retries while testing) would otherwise post the same photo to Instagram twice. After a successful post, it writes `instagramMediaId` back and a second, separate commit step records it.
+
+## Known platform limitation
 
 ## Known platform limitation
 

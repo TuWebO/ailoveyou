@@ -43,3 +43,22 @@ jobs:
             git commit -m "Update daily photo and caption [skip ci]"
             git push
           fi
+
+      - name: Post to Instagram
+        continue-on-error: true
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+        run: node scripts/post-instagram.mjs
+
+      - name: Record Instagram post if published
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add daily-log.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Record Instagram post [skip ci]"
+            git push
+          fi

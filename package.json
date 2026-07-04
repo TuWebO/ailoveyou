@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "smugmug:auth": "node scripts/smugmug-auth.mjs",
-    "daily:generate": "node scripts/generate-daily.mjs"
+    "daily:generate": "node scripts/generate-daily.mjs",
+    "instagram:post": "node scripts/post-instagram.mjs"
   },
   "dependencies": {
     "oauth-1.0a": "^2.2.6",

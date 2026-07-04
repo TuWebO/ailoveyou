@@ -193,7 +193,7 @@ function updateArchiveHtml(entries) {
 <body>
 <header>
   <img src="images/ailoveyou-logo.png" alt="AiLoveYou.ai Logo" class="header-logo" width="32" height="32">
-  <div class="header-title"><a href="index.html">AiLoveYou</a></div>
+  <div class="header-title"><a href="/">AiLoveYou</a></div>
 </header>
 <main class="container">
   <h1>Past days</h1>
@@ -203,7 +203,7 @@ ${items}
 </main>
 <footer>
   <p>AiLoveYou.ai &mdash; a little love, every day.</p>
-  <p><a href="index.html">&larr; Home</a></p>
+  <p><a href="/">&larr; Home</a></p>
 </footer>
 </body>
 </html>

@@ -159,6 +159,8 @@ function updateArchiveHtml(entries) {
   .archive-caption { margin: 12px 16px 4px; font-size: 0.95em; font-style: italic; color: #555; }
   .archive-date { font-size: 0.8em; color: #999; margin: 0 16px; }
   footer { padding: 20px 16px 32px; color: #999; font-size: 0.85em; border-top: 1px solid #e5e5e5; }
+  footer a { color: #777; }
+  footer p { margin: 6px 0; }
 </style>
 </head>
 <body>
@@ -174,6 +176,7 @@ ${items}
 </div>
 <footer>
   <p>AiLoveYou.ai &mdash; a little love, every day.</p>
+  <p><a href="index.html">&larr; Home</a></p>
 </footer>
 </body>
 </html>

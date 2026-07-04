@@ -94,6 +94,7 @@ async function generateCaption(buffer, mediaType) {
 }
 
 const SITE_URL = "https://www.ailoveyou.ai";
+const SHARE_IMAGE = "images/ailoveyou-share.jpg";
 
 function updateIndexHtml({ imagePath, caption }) {
   const indexPath = new URL("index.html", ROOT);
@@ -112,11 +113,11 @@ function updateIndexHtml({ imagePath, caption }) {
     `<meta property="og:url" content="${SITE_URL}/">\n` +
     `<meta property="og:title" content="AiLoveYou &mdash; Hey, I love you.">\n` +
     `<meta property="og:description" content="${escapedCaption}">\n` +
-    `<meta property="og:image" content="${SITE_URL}/${imagePath}">\n` +
+    `<meta property="og:image" content="${SITE_URL}/${SHARE_IMAGE}">\n` +
     `<meta name="twitter:card" content="summary_large_image">\n` +
     `<meta name="twitter:title" content="AiLoveYou &mdash; Hey, I love you.">\n` +
     `<meta name="twitter:description" content="${escapedCaption}">\n` +
-    `<meta name="twitter:image" content="${SITE_URL}/${imagePath}">\n` +
+    `<meta name="twitter:image" content="${SITE_URL}/${SHARE_IMAGE}">\n` +
     `<!-- SEO:END -->`;
 
   const updated = html

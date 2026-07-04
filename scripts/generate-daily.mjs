@@ -242,6 +242,7 @@ ${items}
 <footer>
   <p>AiLoveYou.ai &mdash; a little love, every day.</p>
   <p><a href="/">&larr; Home</a></p>
+  <p>Photos &copy; 2026 tusesiondesurf.com. All rights reserved.</p>
 </footer>
 </body>
 </html>
@@ -266,10 +267,25 @@ const originalUrl = sizes.Response.ImageSizeDetails.ImageSizeOriginal.Url;
 const original = await downloadImage(originalUrl);
 console.log(`Downloaded original: ${(original.length / 1024 / 1024).toFixed(1)} MB`);
 
-const { data: resized, info } = await sharp(original)
+const { data: resizedRaw, info } = await sharp(original)
   .resize({ width: MAX_WIDTH, withoutEnlargement: true })
   .jpeg({ quality: JPEG_QUALITY })
   .toBuffer({ resolveWithObject: true });
+
+// Embed copyright metadata into the already-stripped buffer (not the camera
+// original), so this only ever adds our own notice - never the original
+// photo's GPS/lens/serial EXIF, which we deliberately strip above.
+const resized = await sharp(resizedRaw)
+  .withMetadata({
+    exif: {
+      IFD0: {
+        Copyright: "Copyright tusesiondesurf.com. All rights reserved.",
+        Artist: "tusesiondesurf.com",
+      },
+    },
+  })
+  .jpeg({ quality: JPEG_QUALITY })
+  .toBuffer();
 console.log(`Resized for publishing: ${(resized.length / 1024).toFixed(0)} KB (${info.width}x${info.height})`);
 
 const imageDir = new URL("images/daily/", ROOT);

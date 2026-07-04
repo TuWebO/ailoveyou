@@ -7,6 +7,7 @@ import { smugmugRequest } from "./smugmug-client.mjs";
 const ALBUM_KEY = "6v3DvK"; // "Stock" album (password-protected, owner-accessible)
 const MAX_WIDTH = 1600;
 const JPEG_QUALITY = 82;
+const PAGE_SIZE = 100;
 const ROOT = new URL("..", import.meta.url);
 
 function loadEnv() {
@@ -30,19 +31,54 @@ if (!env.ANTHROPIC_API_KEY) {
   process.exit(1);
 }
 
-async function pickTodaysImage() {
+async function fetchAllAlbumImages() {
   const album = await smugmugRequest(`/api/v2/album/${ALBUM_KEY}`);
   const imagesUri = album.Response.Album.Uris.AlbumImages.Uri;
-  const images = await smugmugRequest(`${imagesUri}?count=100`);
-  const list = (images.Response.AlbumImage ?? []).slice().sort((a, b) => a.FileName.localeCompare(b.FileName));
-  if (list.length === 0) throw new Error(`Album "${album.Name}" has no images`);
 
-  const dayIndex = Math.floor(Date.now() / 86400000) % list.length;
-  const chosen = list[dayIndex];
+  const all = [];
+  let start = 1;
+  for (;;) {
+    const page = await smugmugRequest(`${imagesUri}?count=${PAGE_SIZE}&start=${start}`);
+    const items = page.Response.AlbumImage ?? [];
+    all.push(...items);
+    const total = page.Response.Pages?.Total ?? all.length;
+    if (items.length === 0 || all.length >= total) break;
+    start += PAGE_SIZE;
+  }
 
-  const sizes = await smugmugRequest(chosen.Uris.ImageSizeDetails.Uri);
-  const originalUrl = sizes.Response.ImageSizeDetails.ImageSizeOriginal.Url;
-  return { fileName: chosen.FileName, originalUrl };
+  all.sort((a, b) => a.FileName.localeCompare(b.FileName));
+  return all;
+}
+
+function loadRotationState(path) {
+  if (!existsSync(path)) return { usedImageKeys: [] };
+  return JSON.parse(readFileSync(path, "utf8"));
+}
+
+// Picks the day's photo without ever re-deriving position from the album's
+// current size: reruns on the same date reuse whatever was already picked,
+// and new picks always draw from images not yet used in the current cycle.
+// This way adding/removing photos from the album can't reshuffle picks that
+// were already made, and the same photo can't repeat until every photo in
+// the album has had a turn.
+function pickImageForToday({ images, existingEntry, rotationState }) {
+  if (images.length === 0) throw new Error("Album has no images");
+
+  if (existingEntry?.imageKey) {
+    const alreadyChosen = images.find((img) => img.ImageKey === existingEntry.imageKey);
+    if (alreadyChosen) return { chosen: alreadyChosen, usedImageKeys: rotationState.usedImageKeys };
+  }
+
+  const usedKeys = new Set(rotationState.usedImageKeys);
+  let unused = images.filter((img) => !usedKeys.has(img.ImageKey));
+  if (unused.length === 0) {
+    usedKeys.clear();
+    unused = images;
+  }
+
+  const chosen = unused[0];
+  usedKeys.add(chosen.ImageKey);
+  return { chosen, usedImageKeys: [...usedKeys] };
 }
 
 async function downloadImage(url, attempts = 3) {
@@ -132,10 +168,10 @@ function loadLog(logPath) {
   return JSON.parse(readFileSync(logPath, "utf8"));
 }
 
-function updateLog({ date, imagePath, caption, width, height }) {
+function updateLog({ date, imagePath, imageKey, caption, width, height }) {
   const logPath = new URL("daily-log.json", ROOT);
   const entries = loadLog(logPath).filter((e) => e.date !== date);
-  entries.push({ date, image: imagePath, caption, width, height });
+  entries.push({ date, image: imagePath, imageKey, caption, width, height });
   entries.sort((a, b) => a.date.localeCompare(b.date));
   writeFileSync(logPath, JSON.stringify(entries, null, 2) + "\n");
   return entries;
@@ -214,8 +250,18 @@ ${items}
   writeFileSync(new URL("archive.html", ROOT), html);
 }
 
-const { fileName, originalUrl } = await pickTodaysImage();
-console.log(`Today's photo: ${fileName}`);
+const date = new Date().toISOString().slice(0, 10);
+const rotationStatePath = new URL("rotation-state.json", ROOT);
+const rotationState = loadRotationState(rotationStatePath);
+const existingEntry = loadLog(new URL("daily-log.json", ROOT)).find((e) => e.date === date);
+
+const images = await fetchAllAlbumImages();
+const { chosen, usedImageKeys } = pickImageForToday({ images, existingEntry, rotationState });
+console.log(`Today's photo: ${chosen.FileName} (${chosen.ImageKey})`);
+writeFileSync(rotationStatePath, JSON.stringify({ usedImageKeys }, null, 2) + "\n");
+
+const sizes = await smugmugRequest(chosen.Uris.ImageSizeDetails.Uri);
+const originalUrl = sizes.Response.ImageSizeDetails.ImageSizeOriginal.Url;
 
 const original = await downloadImage(originalUrl);
 console.log(`Downloaded original: ${(original.length / 1024 / 1024).toFixed(1)} MB`);
@@ -226,7 +272,6 @@ const { data: resized, info } = await sharp(original)
   .toBuffer({ resolveWithObject: true });
 console.log(`Resized for publishing: ${(resized.length / 1024).toFixed(0)} KB (${info.width}x${info.height})`);
 
-const date = new Date().toISOString().slice(0, 10);
 const imageDir = new URL("images/daily/", ROOT);
 mkdirSync(imageDir, { recursive: true });
 const imagePath = `images/daily/${date}.jpg`;
@@ -241,6 +286,6 @@ const height = info.height;
 updateIndexHtml({ imagePath, caption, width, height });
 console.log("index.html updated.");
 
-const entries = updateLog({ date, imagePath, caption, width, height });
+const entries = updateLog({ date, imagePath, imageKey: chosen.ImageKey, caption, width, height });
 updateArchiveHtml(entries);
 console.log(`Archive updated (${entries.length} entries).`);

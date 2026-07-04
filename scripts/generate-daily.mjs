@@ -93,7 +93,7 @@ async function generateCaption(buffer, mediaType) {
   return data.content.map((block) => block.text ?? "").join("").trim();
 }
 
-const SITE_URL = "https://www.ailoveyou.ai";
+const SITE_URL = "https://ailoveyou.ai";
 const SHARE_IMAGE = "images/ailoveyou-share.jpg";
 
 function updateIndexHtml({ imagePath, caption }) {

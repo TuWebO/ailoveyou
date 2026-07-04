@@ -226,6 +226,8 @@ function updateArchiveHtml(entries) {
   footer { padding: 20px 16px 32px; color: #707070; font-size: 0.85em; border-top: 1px solid #e5e5e5; }
   footer a { color: #707070; }
   footer p { margin: 6px 0; }
+  .nav-link { margin: 10px 0 0; font-size: 0.95em; }
+  .nav-link a { color: #707070; }
 </style>
 </head>
 <body>
@@ -235,13 +237,13 @@ function updateArchiveHtml(entries) {
 </header>
 <main class="container">
   <h1>Past days</h1>
+  <p class="nav-link"><a href="/">&larr; Home</a></p>
   <div class="archive-grid">
 ${items}
   </div>
 </main>
 <footer>
   <p>AiLoveYou.ai &mdash; a little love, every day.</p>
-  <p><a href="/">&larr; Home</a></p>
   <p>Photos &copy; 2026 tusesiondesurf.com. All rights reserved.</p>
 </footer>
 </body>

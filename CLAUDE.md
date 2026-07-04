@@ -33,7 +33,7 @@ Why it's a separate step, not folded into `generate-daily.mjs`: Instagram's `ima
 
 Duplicate-post guard: the script checks `daily-log.json`'s `instagramMediaId` field for today's entry before posting, and skips if already set — necessary because reruns on the same date (e.g. manual `workflow_dispatch` retries while testing) would otherwise post the same photo to Instagram twice. After a successful post, it writes `instagramMediaId` back and a second, separate commit step records it.
 
-## Known platform limitation
+**Filenames are date-only** (`images/daily/YYYY-MM-DD.jpg`), so two runs on the same calendar day (e.g. the scheduled cron plus a manual test) overwrite the same path/URL. This broke the "wait until live" check the first time we tested Instagram posting: a HEAD request against a URL that *already existed* from an earlier run that day returns 200 immediately, without proving the *new* content is what's actually being served (GitHub Pages' CDN can still serve a stale cached copy of the old file at that URL for a while). Caption text isn't affected (sent as a literal API string, not fetched from a URL) — only the photo can end up stale, which is exactly what happened: Instagram showed an old photo with the new caption. Fixed by stamping every generation with a fresh `version` (epoch ms) used as a cache-busting query string (`?v=...`) on the image URL, and by having `post-instagram.mjs` verify the live URL's `Content-Length` actually matches the local file it just wrote, not just that the URL returns 200.
 
 ## Known platform limitation
 

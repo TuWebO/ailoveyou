@@ -2,7 +2,7 @@
 // Must run after the image has been committed and pushed, since Instagram
 // needs to fetch it from a public URL - this script waits for the deploy to
 // actually go live before calling the Instagram API.
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, statSync } from "node:fs";
 
 const ROOT = new URL("..", import.meta.url);
 const SITE_URL = "https://ailoveyou.ai";
@@ -42,12 +42,17 @@ function saveLog(entries) {
   writeFileSync(logPath, JSON.stringify(entries, null, 2) + "\n");
 }
 
-async function waitUntilLive(url, { attempts = 20, delayMs = 15000 } = {}) {
+// A 200 response alone doesn't prove the *new* content is live - if a
+// same-day rerun overwrote a filename that already existed, the URL already
+// returned 200 before this run even started. Check the byte size actually
+// matches what we just generated, not just that something responds.
+async function waitUntilLive(url, expectedSize, { attempts = 20, delayMs = 15000 } = {}) {
   for (let i = 1; i <= attempts; i++) {
     try {
       const res = await fetch(url, { method: "HEAD" });
-      if (res.ok) return true;
-      console.log(`(${i}/${attempts}) ${url} -> ${res.status}, retrying in ${delayMs / 1000}s...`);
+      const size = Number(res.headers.get("content-length"));
+      if (res.ok && size === expectedSize) return true;
+      console.log(`(${i}/${attempts}) ${url} -> ${res.status}, size ${size} (want ${expectedSize}), retrying in ${delayMs / 1000}s...`);
     } catch (err) {
       console.log(`(${i}/${attempts}) fetch failed (${err.message}), retrying in ${delayMs / 1000}s...`);
     }
@@ -107,9 +112,10 @@ if (entry.instagramMediaId) {
   process.exit(0);
 }
 
-const imageUrl = `${SITE_URL}/${entry.image}`;
-console.log(`Waiting for ${imageUrl} to go live...`);
-const live = await waitUntilLive(imageUrl);
+const imageUrl = `${SITE_URL}/${entry.image}${entry.version ? `?v=${entry.version}` : ""}`;
+const expectedSize = statSync(new URL(entry.image, ROOT)).size;
+console.log(`Waiting for ${imageUrl} to go live (expecting ${expectedSize} bytes)...`);
+const live = await waitUntilLive(imageUrl, expectedSize);
 if (!live) {
   console.error(`Gave up waiting for ${imageUrl} to go live. Skipping Instagram post for today.`);
   process.exit(1);

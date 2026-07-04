@@ -132,14 +132,14 @@ async function generateCaption(buffer, mediaType) {
 const SITE_URL = "https://ailoveyou.ai";
 const SHARE_IMAGE = "images/ailoveyou-share.jpg";
 
-function updateIndexHtml({ imagePath, caption, width, height }) {
+function updateIndexHtml({ imagePath, version, caption, width, height }) {
   const indexPath = new URL("index.html", ROOT);
   const html = readFileSync(indexPath, "utf8");
   const escapedCaption = escapeHtml(caption);
 
   const dailyBlock =
     `<!-- DAILY:START -->\n` +
-    `  <img src="${imagePath}" alt="${escapedCaption}" class="daily-photo" width="${width}" height="${height}" fetchpriority="high">\n` +
+    `  <img src="${imagePath}?v=${version}" alt="${escapedCaption}" class="daily-photo" width="${width}" height="${height}" fetchpriority="high">\n` +
     `  <div class="daily-caption">${caption}</div>\n` +
     `  <!-- DAILY:END -->`;
 
@@ -168,10 +168,10 @@ function loadLog(logPath) {
   return JSON.parse(readFileSync(logPath, "utf8"));
 }
 
-function updateLog({ date, imagePath, imageKey, caption, width, height }) {
+function updateLog({ date, imagePath, imageKey, version, caption, width, height }) {
   const logPath = new URL("daily-log.json", ROOT);
   const entries = loadLog(logPath).filter((e) => e.date !== date);
-  entries.push({ date, image: imagePath, imageKey, caption, width, height });
+  entries.push({ date, image: imagePath, imageKey, version, caption, width, height });
   entries.sort((a, b) => a.date.localeCompare(b.date));
   writeFileSync(logPath, JSON.stringify(entries, null, 2) + "\n");
   return entries;
@@ -187,7 +187,7 @@ function updateArchiveHtml(entries) {
     .reverse()
     .map(
       (e) => `      <div class="archive-item">
-        <img src="${e.image}" alt="${escapeHtml(e.caption)}" class="archive-photo" width="${e.width}" height="${e.height}" loading="lazy">
+        <img src="${e.image}${e.version ? `?v=${e.version}` : ""}" alt="${escapeHtml(e.caption)}" class="archive-photo" width="${e.width}" height="${e.height}" loading="lazy">
         <div class="archive-caption">${escapeHtml(e.caption)}</div>
         <div class="archive-date">${escapeHtml(e.date)}</div>
       </div>`
@@ -295,15 +295,22 @@ mkdirSync(imageDir, { recursive: true });
 const imagePath = `images/daily/${date}.jpg`;
 writeFileSync(new URL(imagePath, ROOT), resized);
 
+// Filenames are date-only, so reruns on the same calendar day (e.g. a
+// scheduled run plus a later manual test) overwrite the same path. A fresh
+// version stamp per run defeats CDN/browser caching at that URL regardless -
+// without it, a "wait until live" check elsewhere can't tell a stale cached
+// response from the real new content, since the URL already existed before.
+const version = Date.now();
+
 const caption = await generateCaption(resized, "image/jpeg");
 console.log(`Caption: ${caption}`);
 
 const width = info.width;
 const height = info.height;
 
-updateIndexHtml({ imagePath, caption, width, height });
+updateIndexHtml({ imagePath, version, caption, width, height });
 console.log("index.html updated.");
 
-const entries = updateLog({ date, imagePath, imageKey: chosen.ImageKey, caption, width, height });
+const entries = updateLog({ date, imagePath, imageKey: chosen.ImageKey, version, caption, width, height });
 updateArchiveHtml(entries);
 console.log(`Archive updated (${entries.length} entries).`);

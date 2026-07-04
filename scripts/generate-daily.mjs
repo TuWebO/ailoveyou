@@ -111,6 +111,7 @@ function updateIndexHtml({ imagePath, caption, width, height }) {
     `<!-- SEO:START -->\n` +
     `<meta property="og:type" content="website">\n` +
     `<meta property="og:url" content="${SITE_URL}/">\n` +
+    `<meta property="og:site_name" content="AiLoveYou.ai">\n` +
     `<meta property="og:title" content="AiLoveYou &mdash; Hey, I love you.">\n` +
     `<meta property="og:description" content="${escapedCaption}">\n` +
     `<meta property="og:image" content="${SITE_URL}/${SHARE_IMAGE}">\n` +
@@ -167,6 +168,7 @@ function updateArchiveHtml(entries) {
 <link rel="canonical" href="${SITE_URL}/archive.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${SITE_URL}/archive.html">
+<meta property="og:site_name" content="AiLoveYou.ai">
 <meta property="og:title" content="AiLoveYou &mdash; Archive">
 <meta property="og:description" content="Past daily photos and captions from AiLoveYou.ai.">
 <meta property="og:image" content="${SITE_URL}/images/ailoveyou-logo.png">

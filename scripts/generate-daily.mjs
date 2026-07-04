@@ -148,11 +148,11 @@ function updateIndexHtml({ imagePath, version, caption, width, height }) {
     `<meta property="og:type" content="website">\n` +
     `<meta property="og:url" content="${SITE_URL}/">\n` +
     `<meta property="og:site_name" content="AiLoveYou.ai">\n` +
-    `<meta property="og:title" content="AiLoveYou &mdash; Hey, I love you.">\n` +
+    `<meta property="og:title" content="AiLoveYou &mdash; AI THAT LOVES YOU BACK">\n` +
     `<meta property="og:description" content="${escapedCaption}">\n` +
     `<meta property="og:image" content="${SITE_URL}/${SHARE_IMAGE}">\n` +
     `<meta name="twitter:card" content="summary_large_image">\n` +
-    `<meta name="twitter:title" content="AiLoveYou &mdash; Hey, I love you.">\n` +
+    `<meta name="twitter:title" content="AiLoveYou &mdash; AI THAT LOVES YOU BACK">\n` +
     `<meta name="twitter:description" content="${escapedCaption}">\n` +
     `<meta name="twitter:image" content="${SITE_URL}/${SHARE_IMAGE}">\n` +
     `<!-- SEO:END -->`;
@@ -210,7 +210,8 @@ function updateArchiveHtml(entries) {
 <meta property="og:image" content="${SITE_URL}/images/ailoveyou-logo.png">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <style>
-  body, html { margin: 0; font-family: Arial, sans-serif; text-align: center; background-color: #f8f8f8; }
+  @font-face { font-family: "Geist"; src: url("fonts/geist-regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+  body, html { margin: 0; font-family: "Geist", Arial, sans-serif; text-align: center; background-color: #f8f8f8; }
   body { display: flex; flex-direction: column; min-height: 100vh; }
   header { width: 100%; box-sizing: border-box; padding: 10px 20px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; z-index: 1000; display: flex; align-items: center; justify-content: flex-start; gap: 10px; }
   .header-logo { width: 32px; height: 32px; border-radius: 50%; }
@@ -233,7 +234,7 @@ function updateArchiveHtml(entries) {
 <body>
 <header>
   <img src="images/ailoveyou-logo.png" alt="AiLoveYou.ai Logo" class="header-logo" width="32" height="32">
-  <div class="header-title"><a href="/">AiLoveYou</a></div>
+  <div class="header-title"><a href="/">ailoveyou.ai</a></div>
 </header>
 <main class="container">
   <h1>Past days</h1>
@@ -243,7 +244,7 @@ ${items}
   </div>
 </main>
 <footer>
-  <p>AiLoveYou.ai &mdash; a little love, every day.</p>
+  <p>ailoveyou.ai &mdash; a little love, every day.</p>
   <p>Photos &copy; 2026 tusesiondesurf.com. All rights reserved.</p>
 </footer>
 </body>

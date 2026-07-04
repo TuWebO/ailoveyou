@@ -23,7 +23,9 @@ Static site on GitHub Pages (repo `TuWebO/ailoveyou`), custom domain **`ailoveyo
 4. Writes `images/daily/YYYY-MM-DD.jpg`, rewrites `index.html` between `<!-- DAILY:START/END -->` (photo + caption) and `<!-- SEO:START/END -->` (og/twitter description + og:description use that day's caption; `og:image`/`twitter:image` point at the fixed `images/ailoveyou-share.jpg`, not the rotating photo — cached link previews would otherwise get stuck on a stale photo).
 5. Appends to `daily-log.json` (date, image path, SmugMug `imageKey`, caption, width, height) and fully regenerates `archive.html` from that log.
 
-`images/ailoveyou-share.jpg` (1200x630, "Hey, I love you." + site name baked in) is the fixed social-share image — not touched by the pipeline, edit it manually if it ever needs to change.
+`images/ailoveyou-share.jpg` (1200x630, "AI THAT LOVES YOU BACK" + site name baked in) is the fixed social-share image — not touched by the pipeline, edit it manually if it ever needs to change.
+
+`fonts/geist-regular.woff2` (self-hosted, SIL OFL license, `fonts/OFL.txt`) is the site's typeface, loaded via `@font-face` in `index.html`/`archive.html`/the `updateArchiveHtml` template — self-hosted rather than pulled from Google Fonts to avoid an extra third-party request (keeps Lighthouse scores intact) and the GDPR exposure some EU sites have hit for loading Google Fonts client-side (it sends visitor IPs to Google).
 
 ## Instagram publishing
 
@@ -35,6 +37,7 @@ Duplicate-post guard: the script checks `daily-log.json`'s `instagramMediaId` fi
 
 **Filenames are date-only** (`images/daily/YYYY-MM-DD.jpg`), so two runs on the same calendar day (e.g. the scheduled cron plus a manual test) overwrite the same path/URL. This broke the "wait until live" check the first time we tested Instagram posting: a HEAD request against a URL that *already existed* from an earlier run that day returns 200 immediately, without proving the *new* content is what's actually being served (GitHub Pages' CDN can still serve a stale cached copy of the old file at that URL for a while). Caption text isn't affected (sent as a literal API string, not fetched from a URL) — only the photo can end up stale, which is exactly what happened: Instagram showed an old photo with the new caption. Fixed by stamping every generation with a fresh `version` (epoch ms) used as a cache-busting query string (`?v=...`) on the image URL, and by having `post-instagram.mjs` verify the live URL's `Content-Length` actually matches the local file it just wrote, not just that the URL returns 200.
 
-## Known platform limitation
+## Known platform limitations
 
-GitHub Pages serves every asset (HTML or image) with a fixed `Cache-Control: max-age=600` — there's no supported way to set longer cache lifetimes per file type from the repo (no custom headers file like Netlify/Vercel). Fronting with a CDN like Cloudflare would be the only fix, and that's an infra decision, not a code change.
+- GitHub Pages serves every asset (HTML or image) with a fixed `Cache-Control: max-age=600` — there's no supported way to set longer cache lifetimes per file type from the repo (no custom headers file like Netlify/Vercel). Fronting with a CDN like Cloudflare would be the only fix, and that's an infra decision, not a code change.
+- Pages is configured as "Deploy from a branch" (`main`), which runs GitHub's own hidden `actions/jekyll-build-pages`-based workflow on every push. `.nojekyll` is supposed to skip that Jekyll build, but the action ignores it (confirmed by reading its `entrypoint.sh` — no `.nojekyll` check exists in it) — so `CLAUDE.md`/`README.md` still get Jekyll-converted into live, off-brand `/CLAUDE.html`/`/README.html` pages. Not a security issue (repo's already public), and both files are unlinked so they're effectively undiscoverable — decided not worth migrating to a custom "GitHub Actions" publishing workflow just to fix this cosmetic issue. Raw `.md` files (`/CLAUDE.md`, `/README.md`) being fetchable is separate and unrelated to Jekyll — GitHub Pages serves every committed file at its path regardless.

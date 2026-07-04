@@ -93,15 +93,35 @@ async function generateCaption(buffer, mediaType) {
   return data.content.map((block) => block.text ?? "").join("").trim();
 }
 
+const SITE_URL = "https://www.ailoveyou.ai";
+
 function updateIndexHtml({ imagePath, caption }) {
   const indexPath = new URL("index.html", ROOT);
   const html = readFileSync(indexPath, "utf8");
-  const block =
+  const escapedCaption = escapeHtml(caption);
+
+  const dailyBlock =
     `<!-- DAILY:START -->\n` +
-    `  <img src="${imagePath}" alt="Today's photo" class="daily-photo">\n` +
+    `  <img src="${imagePath}" alt="${escapedCaption}" class="daily-photo">\n` +
     `  <div class="daily-caption">${caption}</div>\n` +
     `  <!-- DAILY:END -->`;
-  const updated = html.replace(/<!-- DAILY:START -->[\s\S]*?<!-- DAILY:END -->/, block);
+
+  const seoBlock =
+    `<!-- SEO:START -->\n` +
+    `<meta property="og:type" content="website">\n` +
+    `<meta property="og:url" content="${SITE_URL}/">\n` +
+    `<meta property="og:title" content="AiLoveYou &mdash; Hey, I love you.">\n` +
+    `<meta property="og:description" content="${escapedCaption}">\n` +
+    `<meta property="og:image" content="${SITE_URL}/${imagePath}">\n` +
+    `<meta name="twitter:card" content="summary_large_image">\n` +
+    `<meta name="twitter:title" content="AiLoveYou &mdash; Hey, I love you.">\n` +
+    `<meta name="twitter:description" content="${escapedCaption}">\n` +
+    `<meta name="twitter:image" content="${SITE_URL}/${imagePath}">\n` +
+    `<!-- SEO:END -->`;
+
+  const updated = html
+    .replace(/<!-- DAILY:START -->[\s\S]*?<!-- DAILY:END -->/, dailyBlock)
+    .replace(/<!-- SEO:START -->[\s\S]*?<!-- SEO:END -->/, seoBlock);
   writeFileSync(indexPath, updated);
 }
 
@@ -129,7 +149,7 @@ function updateArchiveHtml(entries) {
     .reverse()
     .map(
       (e) => `      <div class="archive-item">
-        <img src="${e.image}" alt="${escapeHtml(e.date)}" class="archive-photo">
+        <img src="${e.image}" alt="${escapeHtml(e.caption)}" class="archive-photo">
         <div class="archive-caption">${escapeHtml(e.caption)}</div>
         <div class="archive-date">${escapeHtml(e.date)}</div>
       </div>`
@@ -143,6 +163,12 @@ function updateArchiveHtml(entries) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AiLoveYou &mdash; Archive</title>
 <meta name="description" content="Past daily photos and captions from AiLoveYou.ai.">
+<link rel="canonical" href="${SITE_URL}/archive.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="${SITE_URL}/archive.html">
+<meta property="og:title" content="AiLoveYou &mdash; Archive">
+<meta property="og:description" content="Past daily photos and captions from AiLoveYou.ai.">
+<meta property="og:image" content="${SITE_URL}/images/ailoveyou-logo.png">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <style>
   body, html { margin: 0; font-family: Arial, sans-serif; text-align: center; background-color: #f8f8f8; }

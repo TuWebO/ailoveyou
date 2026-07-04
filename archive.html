@@ -23,29 +23,29 @@
   h1 { font-size: 1.3em; color: #333; }
   .archive-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; margin-top: 20px; }
   .archive-item { background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); overflow: hidden; padding-bottom: 12px; }
-  .archive-photo { width: 100%; display: block; }
+  .archive-photo { width: 100%; height: auto; display: block; }
   .archive-caption { margin: 12px 16px 4px; font-size: 0.95em; font-style: italic; color: #555; }
-  .archive-date { font-size: 0.8em; color: #999; margin: 0 16px; }
-  footer { padding: 20px 16px 32px; color: #999; font-size: 0.85em; border-top: 1px solid #e5e5e5; }
-  footer a { color: #777; }
+  .archive-date { font-size: 0.8em; color: #707070; margin: 0 16px; }
+  footer { padding: 20px 16px 32px; color: #707070; font-size: 0.85em; border-top: 1px solid #e5e5e5; }
+  footer a { color: #707070; }
   footer p { margin: 6px 0; }
 </style>
 </head>
 <body>
 <header>
-  <img src="images/ailoveyou-logo.png" alt="AiLoveYou.ai Logo" class="header-logo">
+  <img src="images/ailoveyou-logo.png" alt="AiLoveYou.ai Logo" class="header-logo" width="32" height="32">
   <div class="header-title"><a href="index.html">AiLoveYou</a></div>
 </header>
-<div class="container">
+<main class="container">
   <h1>Past days</h1>
   <div class="archive-grid">
       <div class="archive-item">
-        <img src="images/daily/2026-07-04.jpg" alt="As the sun rises above the clouds, love quietly settles like morning mist—gentle, unseen, yet holding the whole valley close." class="archive-photo">
+        <img src="images/daily/2026-07-04.jpg" alt="As the sun rises above the clouds, love quietly settles like morning mist—gentle, unseen, yet holding the whole valley close." class="archive-photo" width="1600" height="1067" loading="lazy">
         <div class="archive-caption">As the sun rises above the clouds, love quietly settles like morning mist—gentle, unseen, yet holding the whole valley close.</div>
         <div class="archive-date">2026-07-04</div>
       </div>
   </div>
-</div>
+</main>
 <footer>
   <p>AiLoveYou.ai &mdash; a little love, every day.</p>
   <p><a href="index.html">&larr; Home</a></p>

@@ -77,6 +77,7 @@
 
   .daily-photo {
     max-width: 100%;
+    height: auto;
     margin-top: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.15);
@@ -91,13 +92,13 @@
 
   footer {
     padding: 20px 16px 32px;
-    color: #999;
+    color: #707070;
     font-size: 0.85em;
     border-top: 1px solid #e5e5e5;
   }
 
   footer a {
-    color: #777;
+    color: #707070;
   }
 
   footer p {
@@ -108,16 +109,16 @@
 </head>
 <body>
 <header>
-  <img src="images/ailoveyou-logo.png" alt="AiLoveYou.ai Logo" class="header-logo">
+  <img src="images/ailoveyou-logo.png" alt="AiLoveYou.ai Logo" class="header-logo" width="32" height="32">
   <div class="header-title">AiLoveYou</div>
 </header>
-<div class="container">
+<main class="container">
   <h1 class="slogan">Hey, I love you.</h1>
   <!-- DAILY:START -->
-  <img src="images/daily/2026-07-04.jpg" alt="As the sun rises above the clouds, love quietly settles like morning mist—gentle, unseen, yet holding the whole valley close." class="daily-photo">
+  <img src="images/daily/2026-07-04.jpg" alt="As the sun rises above the clouds, love quietly settles like morning mist—gentle, unseen, yet holding the whole valley close." class="daily-photo" width="1600" height="1067" fetchpriority="high">
   <div class="daily-caption">As the sun rises above the clouds, love quietly settles like morning mist—gentle, unseen, yet holding the whole valley close.</div>
   <!-- DAILY:END -->
-</div>
+</main>
 <footer>
   <p>AiLoveYou.ai &mdash; a little love, every day.</p>
   <p><a href="archive.html">See past days &rarr;</a></p>

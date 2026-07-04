@@ -96,14 +96,14 @@ async function generateCaption(buffer, mediaType) {
 const SITE_URL = "https://ailoveyou.ai";
 const SHARE_IMAGE = "images/ailoveyou-share.jpg";
 
-function updateIndexHtml({ imagePath, caption }) {
+function updateIndexHtml({ imagePath, caption, width, height }) {
   const indexPath = new URL("index.html", ROOT);
   const html = readFileSync(indexPath, "utf8");
   const escapedCaption = escapeHtml(caption);
 
   const dailyBlock =
     `<!-- DAILY:START -->\n` +
-    `  <img src="${imagePath}" alt="${escapedCaption}" class="daily-photo">\n` +
+    `  <img src="${imagePath}" alt="${escapedCaption}" class="daily-photo" width="${width}" height="${height}" fetchpriority="high">\n` +
     `  <div class="daily-caption">${caption}</div>\n` +
     `  <!-- DAILY:END -->`;
 
@@ -131,10 +131,10 @@ function loadLog(logPath) {
   return JSON.parse(readFileSync(logPath, "utf8"));
 }
 
-function updateLog({ date, imagePath, caption }) {
+function updateLog({ date, imagePath, caption, width, height }) {
   const logPath = new URL("daily-log.json", ROOT);
   const entries = loadLog(logPath).filter((e) => e.date !== date);
-  entries.push({ date, image: imagePath, caption });
+  entries.push({ date, image: imagePath, caption, width, height });
   entries.sort((a, b) => a.date.localeCompare(b.date));
   writeFileSync(logPath, JSON.stringify(entries, null, 2) + "\n");
   return entries;
@@ -150,7 +150,7 @@ function updateArchiveHtml(entries) {
     .reverse()
     .map(
       (e) => `      <div class="archive-item">
-        <img src="${e.image}" alt="${escapeHtml(e.caption)}" class="archive-photo">
+        <img src="${e.image}" alt="${escapeHtml(e.caption)}" class="archive-photo" width="${e.width}" height="${e.height}" loading="lazy">
         <div class="archive-caption">${escapeHtml(e.caption)}</div>
         <div class="archive-date">${escapeHtml(e.date)}</div>
       </div>`
@@ -182,25 +182,25 @@ function updateArchiveHtml(entries) {
   h1 { font-size: 1.3em; color: #333; }
   .archive-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; margin-top: 20px; }
   .archive-item { background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); overflow: hidden; padding-bottom: 12px; }
-  .archive-photo { width: 100%; display: block; }
+  .archive-photo { width: 100%; height: auto; display: block; }
   .archive-caption { margin: 12px 16px 4px; font-size: 0.95em; font-style: italic; color: #555; }
-  .archive-date { font-size: 0.8em; color: #999; margin: 0 16px; }
-  footer { padding: 20px 16px 32px; color: #999; font-size: 0.85em; border-top: 1px solid #e5e5e5; }
-  footer a { color: #777; }
+  .archive-date { font-size: 0.8em; color: #707070; margin: 0 16px; }
+  footer { padding: 20px 16px 32px; color: #707070; font-size: 0.85em; border-top: 1px solid #e5e5e5; }
+  footer a { color: #707070; }
   footer p { margin: 6px 0; }
 </style>
 </head>
 <body>
 <header>
-  <img src="images/ailoveyou-logo.png" alt="AiLoveYou.ai Logo" class="header-logo">
+  <img src="images/ailoveyou-logo.png" alt="AiLoveYou.ai Logo" class="header-logo" width="32" height="32">
   <div class="header-title"><a href="index.html">AiLoveYou</a></div>
 </header>
-<div class="container">
+<main class="container">
   <h1>Past days</h1>
   <div class="archive-grid">
 ${items}
   </div>
-</div>
+</main>
 <footer>
   <p>AiLoveYou.ai &mdash; a little love, every day.</p>
   <p><a href="index.html">&larr; Home</a></p>
@@ -218,11 +218,11 @@ console.log(`Today's photo: ${fileName}`);
 const original = await downloadImage(originalUrl);
 console.log(`Downloaded original: ${(original.length / 1024 / 1024).toFixed(1)} MB`);
 
-const resized = await sharp(original)
+const { data: resized, info } = await sharp(original)
   .resize({ width: MAX_WIDTH, withoutEnlargement: true })
   .jpeg({ quality: JPEG_QUALITY })
-  .toBuffer();
-console.log(`Resized for publishing: ${(resized.length / 1024).toFixed(0)} KB`);
+  .toBuffer({ resolveWithObject: true });
+console.log(`Resized for publishing: ${(resized.length / 1024).toFixed(0)} KB (${info.width}x${info.height})`);
 
 const date = new Date().toISOString().slice(0, 10);
 const imageDir = new URL("images/daily/", ROOT);
@@ -233,9 +233,12 @@ writeFileSync(new URL(imagePath, ROOT), resized);
 const caption = await generateCaption(resized, "image/jpeg");
 console.log(`Caption: ${caption}`);
 
-updateIndexHtml({ imagePath, caption });
+const width = info.width;
+const height = info.height;
+
+updateIndexHtml({ imagePath, caption, width, height });
 console.log("index.html updated.");
 
-const entries = updateLog({ date, imagePath, caption });
+const entries = updateLog({ date, imagePath, caption, width, height });
 updateArchiveHtml(entries);
 console.log(`Archive updated (${entries.length} entries).`);

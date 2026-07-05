@@ -40,3 +40,7 @@ Required environment variables (in `.env` locally, or repo secrets in CI):
 - `daily-log.json` — history of past photos/captions, source of truth for the archive page
 - `rotation-state.json` — tracks which SmugMug photos have been used, so the rotation doesn't repeat until every photo has had a turn
 - `images/daily/` — one resized JPEG per day
+
+## License
+
+The code in this repo is licensed under the [MIT License](LICENSE). The daily photos are not — they're © tusesiondesurf.com, all rights reserved.

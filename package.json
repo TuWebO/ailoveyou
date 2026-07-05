@@ -2,6 +2,7 @@
   "name": "ailoveyou",
   "private": true,
   "type": "module",
+  "license": "MIT",
   "scripts": {
     "smugmug:auth": "node scripts/smugmug-auth.mjs",
     "daily:generate": "node scripts/generate-daily.mjs",

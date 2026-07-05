@@ -1,4 +1,4 @@
-# AiLoveYou.ai
+# ailoveyou.ai
 
 Static site on GitHub Pages (repo `TuWebO/ailoveyou`), custom domain **`ailoveyou.ai`** (bare domain — `www.ailoveyou.ai` 301-redirects to it, so all absolute URLs in the repo must use the bare domain).
 

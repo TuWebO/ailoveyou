@@ -1,4 +1,4 @@
-# AiLoveYou.ai
+# ailoveyou.ai
 
 A small, love-themed static site: every day, an AI picks a photo and writes a one-sentence caption for it, and the homepage updates automatically.
 

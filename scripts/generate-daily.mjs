@@ -97,7 +97,7 @@ async function downloadImage(url, attempts = 3) {
 async function generateCaption(buffer, mediaType) {
   const base64 = buffer.toString("base64");
   const prompt =
-    "You are writing a short caption for a photo on a website called AiLoveYou.ai, which explores " +
+    "You are writing a short caption for a photo on a website called ailoveyou.ai, which explores " +
     "themes of love and connection in everyday moments. Look at this photo and write one warm, evocative " +
     "sentence (max 30 words) capturing a feeling of love, tenderness, or connection inspired by it. " +
     "Write in English. Do not mention AI, the website, or that this is generated. Return only the sentence.";
@@ -147,12 +147,12 @@ function updateIndexHtml({ imagePath, version, caption, width, height }) {
     `<!-- SEO:START -->\n` +
     `<meta property="og:type" content="website">\n` +
     `<meta property="og:url" content="${SITE_URL}/">\n` +
-    `<meta property="og:site_name" content="AiLoveYou.ai">\n` +
-    `<meta property="og:title" content="AiLoveYou &mdash; AI THAT LOVES YOU BACK">\n` +
+    `<meta property="og:site_name" content="ailoveyou.ai">\n` +
+    `<meta property="og:title" content="ailoveyou.ai &mdash; AI THAT LOVES YOU BACK">\n` +
     `<meta property="og:description" content="${escapedCaption}">\n` +
     `<meta property="og:image" content="${SITE_URL}/${SHARE_IMAGE}">\n` +
     `<meta name="twitter:card" content="summary_large_image">\n` +
-    `<meta name="twitter:title" content="AiLoveYou &mdash; AI THAT LOVES YOU BACK">\n` +
+    `<meta name="twitter:title" content="ailoveyou.ai &mdash; AI THAT LOVES YOU BACK">\n` +
     `<meta name="twitter:description" content="${escapedCaption}">\n` +
     `<meta name="twitter:image" content="${SITE_URL}/${SHARE_IMAGE}">\n` +
     `<!-- SEO:END -->`;
@@ -199,14 +199,14 @@ function updateArchiveHtml(entries) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AiLoveYou &mdash; Archive</title>
-<meta name="description" content="Past daily photos and captions from AiLoveYou.ai.">
+<title>ailoveyou.ai &mdash; Archive</title>
+<meta name="description" content="Past daily photos and captions from ailoveyou.ai.">
 <link rel="canonical" href="${SITE_URL}/archive.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${SITE_URL}/archive.html">
-<meta property="og:site_name" content="AiLoveYou.ai">
-<meta property="og:title" content="AiLoveYou &mdash; Archive">
-<meta property="og:description" content="Past daily photos and captions from AiLoveYou.ai.">
+<meta property="og:site_name" content="ailoveyou.ai">
+<meta property="og:title" content="ailoveyou.ai &mdash; Archive">
+<meta property="og:description" content="Past daily photos and captions from ailoveyou.ai.">
 <meta property="og:image" content="${SITE_URL}/images/ailoveyou-logo.png">
 <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -237,7 +237,7 @@ function updateArchiveHtml(entries) {
 </head>
 <body>
 <header>
-  <img src="images/ailoveyou-logo.png" alt="AiLoveYou.ai Logo" class="header-logo" width="32" height="32">
+  <img src="images/ailoveyou-logo.png" alt="ailoveyou.ai Logo" class="header-logo" width="32" height="32">
   <div class="header-title"><a href="/">ailoveyou.ai</a></div>
 </header>
 <main class="container">

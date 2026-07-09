@@ -46,7 +46,7 @@ function saveLog(entries) {
 // same-day rerun overwrote a filename that already existed, the URL already
 // returned 200 before this run even started. Check the byte size actually
 // matches what we just generated, not just that something responds.
-async function waitUntilLive(url, expectedSize, { attempts = 20, delayMs = 15000 } = {}) {
+async function waitUntilLive(url, expectedSize, { attempts = 32, delayMs = 15000 } = {}) {
   for (let i = 1; i <= attempts; i++) {
     try {
       const res = await fetch(url, { method: "HEAD" });

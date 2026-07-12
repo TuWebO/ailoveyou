@@ -8,4 +8,8 @@
     <loc>https://ailoveyou.ai/archive.html</loc>
     <changefreq>daily</changefreq>
   </url>
+  <url>
+    <loc>https://ailoveyou.ai/beaches.html</loc>
+    <changefreq>monthly</changefreq>
+  </url>
 </urlset>

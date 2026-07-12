@@ -243,7 +243,7 @@ function updateArchiveHtml(entries) {
 </header>
 <main class="container">
   <h1>Past days</h1>
-  <p class="nav-link"><a href="/">&larr; Home</a></p>
+  <p class="nav-link"><a href="/">&larr; Home</a> &middot; <a href="beaches.html">Spanish beaches</a></p>
   <div class="archive-grid">
 ${items}
   </div>

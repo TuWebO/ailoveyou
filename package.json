@@ -6,9 +6,11 @@
   "scripts": {
     "smugmug:auth": "node scripts/smugmug-auth.mjs",
     "daily:generate": "node scripts/generate-daily.mjs",
+    "beaches:build": "node scripts/build-beaches-json.mjs",
     "instagram:post": "node scripts/post-instagram.mjs"
   },
   "dependencies": {
+    "hyparquet": "^1.26.2",
     "oauth-1.0a": "^2.2.6",
     "sharp": "^0.35.3"
   }

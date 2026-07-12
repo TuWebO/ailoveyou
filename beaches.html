@@ -34,7 +34,11 @@
   .controls { margin: 24px 0 8px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; }
   .controls input[type="search"], .controls select { font: inherit; color: inherit; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; }
   .controls input[type="search"] { width: 240px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 8px 0 0; }
+  .filters { margin: 12px 0 0; }
+  .filters summary { cursor: pointer; width: fit-content; margin: 0 auto; font-size: 0.9em; color: #555; background: #fff; border: 1px solid #ddd; border-radius: 999px; padding: 6px 16px; user-select: none; }
+  .chip-group { margin-top: 14px; }
+  .chip-group-label { text-align: center; font-size: 0.75em; color: #999; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
   .chip { font: inherit; font-size: 0.85em; color: #555; background: #fff; border: 1px solid #ddd; border-radius: 999px; padding: 5px 12px; cursor: pointer; }
   .chip[aria-pressed="true"] { background: #333; border-color: #333; color: #fff; }
   .result-count { text-align: center; color: #707070; font-size: 0.9em; margin: 16px 0 0; min-height: 1.2em; }
@@ -82,7 +86,10 @@
       <option value="">All regions</option>
     </select>
   </div>
-  <div class="chips" id="chips" role="group" aria-label="Filter by services"></div>
+  <details class="filters" id="filters">
+    <summary id="filters-summary">Filters</summary>
+    <div id="filter-groups"></div>
+  </details>
   <p class="result-count" id="result-count"></p>
 
   <div class="beach-grid" id="grid"></div>

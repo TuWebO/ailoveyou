@@ -7,19 +7,52 @@ const DATA_URL = "data/beaches.json";
 const DAILY_LOG_URL = "daily-log.json";
 const BATCH_SIZE = 40;
 
-// One place defines the service filters AND the tags shown on cards.
-const SERVICE_FILTERS = [
-  { key: "blueFlag", label: "Blue Flag", test: (b) => b.environment.blueFlag === true },
-  { key: "lifeguard", label: "Lifeguard", test: (b) => b.safety.lifeguardService === true },
-  { key: "wheelchair", label: "Wheelchair access", test: (b) => b.access.wheelchairAccessible === true },
-  { key: "parking", label: "Parking", test: (b) => b.access.parking === true },
-  { key: "restrooms", label: "Restrooms", test: (b) => b.services.restrooms === true },
-  { key: "showers", label: "Showers", test: (b) => b.services.showers === true },
-  { key: "food", label: "Food & drink", test: (b) => b.services.foodKiosk === true },
-  { key: "surf", label: "Surf", test: (b) => b.services.surfZone === true },
-  { key: "diving", label: "Diving", test: (b) => b.services.divingZone === true },
-  { key: "nudist", label: "Nudist", test: (b) => ["yes", "partial", "tolerated"].includes(b.physical.nudism) },
+// Enum-ish fields hold " / " combos ("Arena / Grava"), so filters test by
+// contains rather than equality.
+function has(value, ...terms) {
+  return typeof value === "string" && terms.some((t) => value.includes(t));
+}
+
+// One place defines all filters, grouped like the panel shows them.
+// `card: true` marks the curated subset also shown as tags on beach cards
+// (descriptive chips like "Sandy" would be noise there).
+const FILTER_GROUPS = [
+  { name: "Services", filters: [
+    { key: "blueFlag", label: "Blue Flag", card: true, test: (b) => b.environment.blueFlag === true },
+    { key: "lifeguard", label: "Lifeguard", card: true, test: (b) => b.safety.lifeguardService === true },
+    { key: "wheelchair", label: "Wheelchair access", card: true, test: (b) => b.access.wheelchairAccessible === true },
+    { key: "parking", label: "Parking", card: true, test: (b) => b.access.parking === true },
+    { key: "restrooms", label: "Restrooms", card: true, test: (b) => b.services.restrooms === true },
+    { key: "showers", label: "Showers / foot wash", card: true, test: (b) => b.services.showers === true || b.services.footShowers === true },
+    { key: "food", label: "Food & drink", card: true, test: (b) => b.services.foodKiosk === true },
+    { key: "rentals", label: "Umbrellas / loungers", test: (b) => b.services.rentalUmbrellas === true || b.services.rentalLoungers === true },
+    { key: "playground", label: "Playground", test: (b) => b.services.playground === true },
+  ] },
+  { name: "Beach", filters: [
+    { key: "sandy", label: "Sandy", test: (b) => has(b.physical.sandComposition, "Arena") },
+    { key: "pebbles", label: "Pebbles / rocks", test: (b) => has(b.physical.sandComposition, "Bolos", "Grava", "Roca") },
+    { key: "calm", label: "Calm water", test: (b) => has(b.physical.waterConditions, "Aguas tranquilas") },
+    { key: "quiet", label: "Low occupancy", test: (b) => /bajo/i.test(b.physical.occupancyLevel ?? "") },
+    { key: "long", label: "Long (>1 km)", test: (b) => b.physical.lengthM >= 1000 },
+    { key: "natural", label: "Isolated / natural", test: (b) => has(b.physical.urbanizationLevel, "Aislada", "Playa natural") },
+    { key: "cliffs", label: "Cliffs / mountains", test: (b) => has(b.physical.coastalLandscape, "Acantilado", "Montaña") },
+    { key: "dunes", label: "Dunes", test: (b) => has(b.physical.coastalLandscape, "Dunas") },
+    { key: "nudist", label: "Nudist", card: true, test: (b) => ["yes", "partial", "tolerated"].includes(b.physical.nudism) },
+    { key: "dogs", label: "Dog friendly", card: true, test: (b) => b.custom?.dogFriendly === true },
+  ] },
+  { name: "Activities", filters: [
+    { key: "surf", label: "Surf", card: true, test: (b) => b.services.surfZone === true },
+    { key: "diving", label: "Diving", card: true, test: (b) => b.services.divingZone === true },
+    { key: "nauticalRental", label: "Nautical rental", test: (b) => b.services.rentalOther === true },
+    { key: "nauticalClub", label: "Nautical club", test: (b) => b.services.nauticalClub === true },
+    { key: "anchorage", label: "Boat anchorage", test: (b) => b.safety.anchorageZone === true },
+    { key: "sports", label: "Sports area", test: (b) => b.services.sportsArea === true },
+  ] },
 ];
+
+const ALL_FILTERS = FILTER_GROUPS.flatMap((g) => g.filters);
+const FILTERS_BY_KEY = new Map(ALL_FILTERS.map((f) => [f.key, f]));
+const CARD_TAG_FILTERS = ALL_FILTERS.filter((f) => f.card);
 
 const state = {
   beaches: [],
@@ -36,7 +69,9 @@ const statusEl = document.getElementById("status");
 const resultCount = document.getElementById("result-count");
 const searchInput = document.getElementById("search");
 const communitySelect = document.getElementById("community");
-const chipsContainer = document.getElementById("chips");
+const filtersPanel = document.getElementById("filters");
+const filtersSummary = document.getElementById("filters-summary");
+const filterGroupsContainer = document.getElementById("filter-groups");
 const sentinel = document.getElementById("sentinel");
 
 function escapeHtml(str) {
@@ -70,7 +105,7 @@ function cardHtml(b) {
     .filter(Boolean)
     .join(" &middot; ");
 
-  const tags = SERVICE_FILTERS.filter(({ test }) => test(b))
+  const tags = CARD_TAG_FILTERS.filter(({ test }) => test(b))
     .map(({ key, label }) => `<span class="beach-tag${key === "blueFlag" ? " blue-flag" : ""}">${label}</span>`)
     .join("");
 
@@ -102,7 +137,7 @@ function cardHtml(b) {
 function matches(b) {
   if (state.community && b.location.autonomousCommunity !== state.community) return false;
   for (const key of state.activeServices) {
-    const filter = SERVICE_FILTERS.find((f) => f.key === key);
+    const filter = FILTERS_BY_KEY.get(key);
     if (filter && !filter.test(b)) return false;
   }
   if (state.query && !searchHaystack(b).includes(state.query)) return false;
@@ -140,22 +175,50 @@ function populateCommunities() {
   }
 }
 
-function buildChips() {
-  for (const { key, label } of SERVICE_FILTERS) {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "chip";
-    chip.textContent = label;
-    chip.setAttribute("aria-pressed", "false");
-    chip.addEventListener("click", () => {
-      const active = state.activeServices.has(key);
-      if (active) state.activeServices.delete(key);
-      else state.activeServices.add(key);
-      chip.setAttribute("aria-pressed", String(!active));
-      applyFilters();
-    });
-    chipsContainer.append(chip);
+function updateFilterSummary() {
+  const n = state.activeServices.size;
+  filtersSummary.textContent = n > 0 ? `Filters · ${n}` : "Filters";
+}
+
+function buildFilterPanel() {
+  for (const group of FILTER_GROUPS) {
+    const groupLabel = document.createElement("div");
+    groupLabel.className = "chip-group-label";
+    groupLabel.textContent = group.name;
+
+    const chips = document.createElement("div");
+    chips.className = "chips";
+    chips.setAttribute("role", "group");
+    chips.setAttribute("aria-label", `${group.name} filters`);
+    for (const { key, label } of group.filters) {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip";
+      chip.textContent = label;
+      chip.setAttribute("aria-pressed", "false");
+      chip.addEventListener("click", () => {
+        const active = state.activeServices.has(key);
+        if (active) state.activeServices.delete(key);
+        else state.activeServices.add(key);
+        chip.setAttribute("aria-pressed", String(!active));
+        updateFilterSummary();
+        applyFilters();
+      });
+      chips.append(chip);
+    }
+
+    const wrap = document.createElement("div");
+    wrap.className = "chip-group";
+    wrap.append(groupLabel);
+    wrap.append(chips);
+    filterGroupsContainer.append(wrap);
   }
+
+  // Collapsed by default on small screens, open where there's room.
+  if (typeof matchMedia === "function" && matchMedia("(min-width: 700px)").matches) {
+    filtersPanel.open = true;
+  }
+  updateFilterSummary();
 }
 
 // Renders a card for a beach that lazy loading hasn't reached yet, then
@@ -173,7 +236,7 @@ export function focusBeach(beachId) {
 }
 
 async function init() {
-  buildChips();
+  buildFilterPanel();
 
   let response;
   try {

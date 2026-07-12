@@ -16,7 +16,10 @@ const ROOT = new URL("..", import.meta.url);
 const CSV_PATH = new URL("data/raw/playas_espanolas.csv", ROOT);
 const PARQUET_PATH = new URL("data/raw/beaches_clean.parquet", ROOT);
 // Full build artifact: everything, including embeddingText (for the RAG
-// indexer) and the *Raw audit fields for the unconfirmed-meaning columns.
+// indexer) and the *Raw audit fields for the two still-unconfirmed columns
+// (Establec_1/otherEstablishments, Servicio_l/cleaningService). Alquiler_n
+// (nautical rental) and Establecim (chiringuito/food) were confirmed against
+// RTVE's filter UI built on this same dataset, so their Raw siblings are gone.
 const OUT_FULL_PATH = new URL("data/beaches-full.json", ROOT);
 // Slim public version fetched by beaches.html.
 const OUT_SLIM_PATH = new URL("data/beaches.json", ROOT);
@@ -299,6 +302,7 @@ const SERVICE_LABELS = [
   [(b) => b.services.publicPhones, "public phones"],
   [(b) => b.services.rentalUmbrellas, "umbrella rental"],
   [(b) => b.services.rentalLoungers, "lounger rental"],
+  [(b) => b.services.rentalOther, "nautical rental"],
   [(b) => b.services.foodKiosk, "food establishments"],
   [(b) => b.services.touristOffice, "tourist office"],
   [(b) => b.services.playground, "playground"],
@@ -392,9 +396,7 @@ function buildBeach(csv, pq) {
       rentalUmbrellas: toBool("Alquiler_s", csv["Alquiler_s"]),
       rentalLoungers: toBool("Alquiler_h", csv["Alquiler_h"]),
       rentalOther: toBool("Alquiler_n", csv["Alquiler_n"]),
-      rentalOtherRaw: trimOrNull(csv["Alquiler_n"]),
       foodKiosk: toBool("Establecim", csv["Establecim"]),
-      foodKioskRaw: trimOrNull(csv["Establecim"]),
       otherEstablishments: toBool("Establec_1", csv["Establec_1"]),
       otherEstablishmentsRaw: trimOrNull(csv["Establec_1"]),
       touristOffice: toBool("Oficina_tu", csv["Oficina_tu"]),
@@ -604,7 +606,7 @@ if (appliedOverrides.length === 0) {
 
 function slimBeach(b) {
   const { embeddingText, ...rest } = b;
-  const { rentalOtherRaw, foodKioskRaw, otherEstablishmentsRaw, cleaningServiceRaw, ...services } = b.services;
+  const { otherEstablishmentsRaw, cleaningServiceRaw, ...services } = b.services;
   return { ...rest, services };
 }
 

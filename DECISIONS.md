@@ -20,6 +20,17 @@ typo-check keeps working. Overrides regenerate embeddingText, so custom fields r
 the RAG index automatically; the M4 indexer must treat full reindexing as cheap and
 routine, since any schema growth changes embeddingText.
 
+## Unconfirmed column meanings — two confirmed (2026-07-12)
+
+RTVE's beach finder is built on this same MITECO dataset, and its filter labels
+double as an official translation of the cryptic CSV columns. That confirmed
+`Alquiler_n` = nautical equipment rental ("Alquiler náutico") and `Establecim` =
+chiringuito/food establishments ("Chiringuito"), so their `*Raw` audit siblings
+were dropped from the build. `Establec_1` (otherEstablishments) and `Servicio_l`
+(cleaningService) remain unconfirmed and keep their raw siblings. RTVE also
+exposes "Playa canina", which our CSV export lacks — that's exactly what
+`custom.dogFriendly` covers.
+
 ## No embedded map (decided 2026-07-12)
 
 Beach pages link out to Google Maps instead of embedding a Leaflet/OSM map. Reason:

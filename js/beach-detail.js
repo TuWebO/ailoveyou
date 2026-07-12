@@ -46,7 +46,7 @@ const SERVICE_LABELS = [
   ["publicPhones", "Public phones"],
   ["rentalUmbrellas", "Umbrella rental"],
   ["rentalLoungers", "Lounger rental"],
-  ["rentalOther", "Other rentals"],
+  ["rentalOther", "Nautical rental"],
   ["foodKiosk", "Food & drink"],
   ["otherEstablishments", "Other establishments"],
   ["touristOffice", "Tourist office"],

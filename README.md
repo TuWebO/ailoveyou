@@ -39,6 +39,12 @@ fields, add dot-path entries to `data/beach-overrides.json` (e.g.
 `{ "ES-000123": { "services.surfZone": true } }`) and rerun the build — don't edit the
 raw CSV.
 
+Daily photos can be linked to a beach: tag the SmugMug photo with a keyword like
+`beach:ES-000123` (picked up automatically by the daily pipeline), or tag past
+entries by hand with `node scripts/find-beach.mjs <query>` to find the id and
+`node scripts/find-beach.mjs --set <date> <beachId>` to write it into
+`daily-log.json`. Tagged photos appear on that beach's card on `beaches.html`.
+
 ## Project structure
 
 - `index.html` / `archive.html` — the site itself (static, no build step)

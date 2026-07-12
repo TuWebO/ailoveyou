@@ -50,6 +50,33 @@ async function fetchAllAlbumImages() {
   return all;
 }
 
+// A SmugMug photo tagged with the keyword "beach:ES-000123" links that
+// photo to the beach with that id in data/beaches.json. A bad or unknown
+// tag only warns - the daily update must never fail over beach metadata.
+function beachIdFromKeywords(image) {
+  const keywords = Array.isArray(image.KeywordArray)
+    ? image.KeywordArray
+    : String(image.Keywords ?? "").split(/[;,]/);
+  for (const keyword of keywords) {
+    const match = String(keyword).trim().match(/^beach:(ES-\d{6})$/i);
+    if (match) return match[1].toUpperCase();
+  }
+  return null;
+}
+
+function validatedBeachId(image) {
+  const beachId = beachIdFromKeywords(image);
+  if (!beachId) return null;
+  try {
+    const beaches = JSON.parse(readFileSync(new URL("data/beaches.json", ROOT), "utf8"));
+    if (beaches.some((b) => b.id === beachId)) return beachId;
+    console.warn(`Ignoring beach tag ${beachId}: no such id in data/beaches.json.`);
+  } catch (err) {
+    console.warn(`Ignoring beach tag ${beachId}: could not read data/beaches.json (${err.message}).`);
+  }
+  return null;
+}
+
 function loadRotationState(path) {
   if (!existsSync(path)) return { usedImageKeys: [] };
   return JSON.parse(readFileSync(path, "utf8"));
@@ -168,10 +195,10 @@ function loadLog(logPath) {
   return JSON.parse(readFileSync(logPath, "utf8"));
 }
 
-function updateLog({ date, imagePath, imageKey, version, caption, width, height }) {
+function updateLog({ date, imagePath, imageKey, version, caption, width, height, beachId }) {
   const logPath = new URL("daily-log.json", ROOT);
   const entries = loadLog(logPath).filter((e) => e.date !== date);
-  entries.push({ date, image: imagePath, imageKey, version, caption, width, height });
+  entries.push({ date, image: imagePath, imageKey, version, caption, width, height, ...(beachId ? { beachId } : {}) });
   entries.sort((a, b) => a.date.localeCompare(b.date));
   writeFileSync(logPath, JSON.stringify(entries, null, 2) + "\n");
   return entries;
@@ -317,6 +344,9 @@ const height = info.height;
 updateIndexHtml({ imagePath, version, caption, width, height });
 console.log("index.html updated.");
 
-const entries = updateLog({ date, imagePath, imageKey: chosen.ImageKey, version, caption, width, height });
+const beachId = validatedBeachId(chosen);
+if (beachId) console.log(`Beach tag: ${beachId}`);
+
+const entries = updateLog({ date, imagePath, imageKey: chosen.ImageKey, version, caption, width, height, beachId });
 updateArchiveHtml(entries);
 console.log(`Archive updated (${entries.length} entries).`);

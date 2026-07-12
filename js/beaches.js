@@ -4,6 +4,7 @@
 // the future chat) can scroll to and highlight specific beaches.
 
 const DATA_URL = "data/beaches.json";
+const DAILY_LOG_URL = "daily-log.json";
 const BATCH_SIZE = 40;
 
 // One place defines the service filters AND the tags shown on cards.
@@ -27,6 +28,7 @@ const state = {
   query: "",
   community: "",
   activeServices: new Set(),
+  photosByBeach: new Map(), // beachId -> daily-log entries tagged with it
 };
 
 const grid = document.getElementById("grid");
@@ -74,10 +76,18 @@ function cardHtml(b) {
 
   const mapUrl = `https://maps.google.com/?q=${loc.latitude},${loc.longitude}`;
 
+  const photos = (state.photosByBeach.get(b.id) ?? [])
+    .map((e) => {
+      const src = escapeHtml(`${e.image}${e.version ? `?v=${e.version}` : ""}`);
+      return `<a href="${src}" target="_blank" rel="noopener"><img class="beach-photo-thumb" src="${src}" alt="${escapeHtml(e.caption)}" title="${escapeHtml(e.date)}" loading="lazy"></a>`;
+    })
+    .join("");
+
   return `<article class="beach-card" id="beach-${escapeHtml(b.id)}" data-beach-id="${escapeHtml(b.id)}">
     <h2 class="beach-name">${escapeHtml(b.name)}</h2>
     <div class="beach-location">${locationLine}</div>
     <p class="beach-desc">${escapeHtml(b.description)}</p>
+    ${photos ? `<div class="beach-photos">${photos}</div>` : ""}
     ${meta ? `<div class="beach-meta">${meta}</div>` : ""}
     ${tags ? `<div class="beach-tags">${tags}</div>` : ""}
     <a class="beach-map" href="${mapUrl}" target="_blank" rel="noopener">View on map &#8599;</a>
@@ -169,6 +179,22 @@ async function init() {
     statusEl.textContent = "Could not load the beach data. Please try again later.";
     console.error("Failed to load beaches:", err);
     return;
+  }
+
+  // Daily photos tagged with a beachId show up on that beach's card.
+  // The page works fine without them, so failures here are non-fatal.
+  try {
+    const logResponse = await fetch(DAILY_LOG_URL);
+    if (logResponse.ok) {
+      for (const entry of await logResponse.json()) {
+        if (!entry.beachId) continue;
+        const list = state.photosByBeach.get(entry.beachId) ?? [];
+        list.push(entry);
+        state.photosByBeach.set(entry.beachId, list);
+      }
+    }
+  } catch (err) {
+    console.warn("Daily photo log unavailable:", err);
   }
 
   populateCommunities();

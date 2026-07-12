@@ -21,8 +21,12 @@ const PARQUET_PATH = new URL("data/raw/beaches_clean.parquet", ROOT);
 // (nautical rental) and Establecim (chiringuito/food) were confirmed against
 // RTVE's filter UI built on this same dataset, so their Raw siblings are gone.
 const OUT_FULL_PATH = new URL("data/beaches-full.json", ROOT);
-// Slim public version fetched by beaches.html.
+// Slim public version fetched by beach.html (per-beach detail page).
 const OUT_SLIM_PATH = new URL("data/beaches.json", ROOT);
+// Card-page index fetched by beaches.html: only the fields its cards,
+// filters and search use, with descriptions truncated - half the transfer
+// size of the slim file, which is what mobile Lighthouse LCP hinges on.
+const OUT_INDEX_PATH = new URL("data/beaches-index.json", ROOT);
 // Hand-maintained corrections applied on top of the parsed CSV data as the
 // final build step - never edit the raw MITECO CSV for one-off fixes.
 // Format: { "ES-000123": { "services.surfZone": true, ... }, ... }
@@ -610,6 +614,64 @@ function slimBeach(b) {
   return { ...rest, services };
 }
 
+// Cards clamp descriptions to three lines, so the index carries ~220 chars.
+function truncate(text, max) {
+  if (text.length <= max) return text;
+  const cut = text.lastIndexOf(" ", max);
+  return text.slice(0, cut > 0 ? cut : max) + "…";
+}
+
+function indexBeach(b) {
+  return {
+    id: b.id,
+    name: b.name,
+    alternateNames: b.alternateNames,
+    location: {
+      municipality: b.location.municipality,
+      province: b.location.province,
+      autonomousCommunity: b.location.autonomousCommunity,
+      island: b.location.island,
+      latitude: b.location.latitude,
+      longitude: b.location.longitude,
+    },
+    description: truncate(b.description, 220),
+    physical: {
+      lengthM: b.physical.lengthM,
+      sandType: b.physical.sandType,
+      sandComposition: b.physical.sandComposition,
+      waterConditions: b.physical.waterConditions,
+      occupancyLevel: b.physical.occupancyLevel,
+      urbanizationLevel: b.physical.urbanizationLevel,
+      coastalLandscape: b.physical.coastalLandscape,
+      nudism: b.physical.nudism,
+    },
+    access: {
+      wheelchairAccessible: b.access.wheelchairAccessible,
+      parking: b.access.parking,
+    },
+    services: {
+      restrooms: b.services.restrooms,
+      showers: b.services.showers,
+      footShowers: b.services.footShowers,
+      rentalUmbrellas: b.services.rentalUmbrellas,
+      rentalLoungers: b.services.rentalLoungers,
+      rentalOther: b.services.rentalOther,
+      foodKiosk: b.services.foodKiosk,
+      playground: b.services.playground,
+      sportsArea: b.services.sportsArea,
+      nauticalClub: b.services.nauticalClub,
+      divingZone: b.services.divingZone,
+      surfZone: b.services.surfZone,
+    },
+    safety: {
+      lifeguardService: b.safety.lifeguardService,
+      anchorageZone: b.safety.anchorageZone,
+    },
+    environment: { blueFlag: b.environment.blueFlag },
+    custom: b.custom,
+  };
+}
+
 function writeJson(path, data) {
   const json = JSON.stringify(data) + "\n";
   writeFileSync(path, json);
@@ -619,5 +681,6 @@ function writeJson(path, data) {
 
 writeJson(OUT_FULL_PATH, beaches);
 writeJson(OUT_SLIM_PATH, beaches.map(slimBeach));
+writeJson(OUT_INDEX_PATH, beaches.map(indexBeach));
 
 printReport(beaches);

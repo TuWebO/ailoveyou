@@ -3,7 +3,9 @@
 // carries id="beach-{beachId}" and data-beach-id so other features (e.g.
 // the future chat) can scroll to and highlight specific beaches.
 
-const DATA_URL = "data/beaches.json";
+// Card-page index (subset of data/beaches.json with truncated descriptions);
+// the detail page fetches the full records instead.
+const DATA_URL = "data/beaches-index.json";
 const DAILY_LOG_URL = "daily-log.json";
 const BATCH_SIZE = 40;
 
@@ -69,7 +71,6 @@ const statusEl = document.getElementById("status");
 const resultCount = document.getElementById("result-count");
 const searchInput = document.getElementById("search");
 const communitySelect = document.getElementById("community");
-const filtersPanel = document.getElementById("filters");
 const filtersSummary = document.getElementById("filters-summary");
 const filterGroupsContainer = document.getElementById("filter-groups");
 const sentinel = document.getElementById("sentinel");
@@ -212,11 +213,6 @@ function buildFilterPanel() {
     wrap.append(groupLabel);
     wrap.append(chips);
     filterGroupsContainer.append(wrap);
-  }
-
-  // Collapsed by default on small screens, open where there's room.
-  if (typeof matchMedia === "function" && matchMedia("(min-width: 700px)").matches) {
-    filtersPanel.open = true;
   }
   updateFilterSummary();
 }

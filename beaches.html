@@ -17,6 +17,7 @@
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
+<link rel="preload" href="data/beaches-index.json" as="fetch" crossorigin>
 <style>
   @font-face { font-family: "Geist"; src: url("fonts/geist-regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
   body, html { margin: 0; font-family: "Geist", Arial, sans-serif; background-color: #f8f8f8; color: #333; }
@@ -25,7 +26,9 @@
   .header-logo { width: 32px; height: 32px; border-radius: 50%; }
   .header-title { font-size: 1.5em; color: #333; }
   .header-title a { color: inherit; text-decoration: none; }
-  .container { flex: 1; width: 100%; max-width: 1100px; box-sizing: border-box; margin: 70px auto 0; padding: 0 20px 60px; }
+  /* min-height keeps the footer below the fold while the beach data loads,
+     so the card render doesn't shift it (Lighthouse CLS). */
+  .container { flex: 1; width: 100%; max-width: 1100px; box-sizing: border-box; margin: 70px auto 0; padding: 0 20px 60px; min-height: 100vh; }
   h1 { font-size: 1.3em; text-align: center; }
   .nav-link { margin: 10px 0 0; font-size: 0.95em; text-align: center; }
   .nav-link a { color: #707070; }

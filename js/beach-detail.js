@@ -34,6 +34,10 @@ function formatWidth(p) {
 
 const NUDISM_LABELS = { no: "No", yes: "Yes", partial: "Partial", tolerated: "Tolerated" };
 
+// Labels for build-time custom fields (community knowledge not in the
+// MITECO dataset). Unlabelled keys fall back to the raw key name.
+const CUSTOM_LABELS = { dogFriendly: "Dog friendly" };
+
 const SERVICE_LABELS = [
   ["restrooms", "Restrooms"],
   ["showers", "Showers"],
@@ -124,6 +128,10 @@ function render(beach, photoEntries) {
       ["Environmental actions", yesNoWith(beach.environment.environmentalActions, beach.environment.environmentalActionsDescription)],
       ["Protected area", beach.environment.inProtectedArea ? (beach.environment.protectedAreaName ?? "Yes") : yesNo(beach.environment.inProtectedArea)],
     ]),
+    factsSection("More", Object.entries(beach.custom ?? {}).map(([key, value]) => [
+      CUSTOM_LABELS[key] ?? key,
+      typeof value === "boolean" ? yesNo(value) : value,
+    ])),
     factsSection("Nearby", [
       ["Marina", beach.nearby.marina],
       ["Marina website", beach.nearby.marinaWebsite ? externalLink(beach.nearby.marinaWebsite) : null, true],

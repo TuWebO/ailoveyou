@@ -26,6 +26,15 @@ const OUT_SLIM_PATH = new URL("data/beaches.json", ROOT);
 const OVERRIDES_PATH = new URL("data/beach-overrides.json", ROOT);
 const EXPECTED_ROWS = 3551;
 
+// Fields that do not exist in the MITECO dataset, stamped into a "custom"
+// section on every beach with these defaults (null = unknown, never false).
+// Declaring a field here is what makes it settable via beach-overrides.json
+// ("custom.dogFriendly": true) - the overrides typo-check requires paths to
+// exist. Add new community-knowledge fields here, one line each.
+const CUSTOM_FIELD_DEFAULTS = {
+  dogFriendly: null,
+};
+
 // ---------- CSV parsing (RFC 4180: quoted fields, "" escapes, BOM) ----------
 
 function parseCsv(text) {
@@ -323,6 +332,7 @@ function buildEmbeddingText(b) {
   if (b.environment.blueFlag) parts.push("Blue Flag certified.");
   if (b.access.wheelchairAccessible) parts.push("Wheelchair accessible.");
   if (["yes", "partial", "tolerated"].includes(b.physical.nudism)) parts.push("Nudist beach.");
+  if (b.custom.dogFriendly === true) parts.push("Dog friendly.");
   if (b.environment.inProtectedArea && b.environment.protectedAreaName) {
     parts.push(`In protected area: ${b.environment.protectedAreaName}.`);
   }
@@ -421,6 +431,7 @@ function buildBeach(csv, pq) {
       hospitalPhone: trimOrNull(csv["Teléfono_"]),
       distanceToHospitalKm: parseDistanceKm("Distancia1", csv["Distancia1"]),
     },
+    custom: { ...CUSTOM_FIELD_DEFAULTS },
     officialSourceUrl: csv["URL_MAGRAM"].trim(),
     embeddingText: "",
   };

@@ -10,6 +10,26 @@ fixes. Overrides are keyed by beach id with dot-path fields
 (`{ "ES-000123": { "services.surfZone": true } }`); the build fails loudly on unknown
 ids or paths, and regenerates the affected beach's embeddingText.
 
+## Custom fields (properties the MITECO dataset lacks)
+
+Fields like `custom.dogFriendly` are declared once in `CUSTOM_FIELD_DEFAULTS` in
+`scripts/build-beaches-json.mjs`, stamped into every beach's `custom` section with a
+`null` default (null = unknown, never false), and given values per beach through
+`data/beach-overrides.json` — same flow as data corrections, so the overrides
+typo-check keeps working. Overrides regenerate embeddingText, so custom fields reach
+the RAG index automatically; the M4 indexer must treat full reindexing as cheap and
+routine, since any schema growth changes embeddingText.
+
+## No embedded map (decided 2026-07-12)
+
+Beach pages link out to Google Maps instead of embedding a Leaflet/OSM map. Reason:
+the site's policy is no third-party requests on page view (why fonts are
+self-hosted — Lighthouse + GDPR/visitor-IP exposure). Vendoring Leaflet's JS/CSS
+would keep the code first-party, but map *tiles* must stream from a third-party
+server at view time, which breaks the policy; fully self-hosted tiles for Spain
+don't fit under GitHub Pages' 100 MB file limit. Revisit only if the policy changes
+or the site moves off Pages.
+
 ## Embedding language strategy (decided before M4)
 
 - embeddingText fields are written in each beach's local/source language — Spanish

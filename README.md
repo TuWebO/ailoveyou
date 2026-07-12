@@ -37,7 +37,8 @@ Required environment variables (in `.env` locally, or repo secrets in CI):
 the raw MITECO "Guía de Playas" dataset in `data/raw/`. To correct individual beach
 fields, add dot-path entries to `data/beach-overrides.json` (e.g.
 `{ "ES-000123": { "services.surfZone": true } }`) and rerun the build — don't edit the
-raw CSV.
+raw CSV. Properties the dataset lacks (e.g. `custom.dogFriendly`) are declared in
+`CUSTOM_FIELD_DEFAULTS` in the build script and set per beach the same way.
 
 Daily photos can be linked to a beach: tag the SmugMug photo with a keyword like
 `beach:ES-000123` (picked up automatically by the daily pipeline), or tag past

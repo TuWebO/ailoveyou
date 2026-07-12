@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ailoveyou.ai &mdash; Beach details</title>
+<meta name="description" content="Full details for a Spanish beach: services, access, safety, environment and location, from the official Guía de Playas dataset.">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<style>
+  @font-face { font-family: "Geist"; src: url("fonts/geist-regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+  body, html { margin: 0; font-family: "Geist", Arial, sans-serif; background-color: #f8f8f8; color: #333; }
+  body { display: flex; flex-direction: column; min-height: 100vh; }
+  header { width: 100%; box-sizing: border-box; padding: 10px 20px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; z-index: 1000; display: flex; align-items: center; justify-content: flex-start; gap: 10px; }
+  .header-logo { width: 32px; height: 32px; border-radius: 50%; }
+  .header-title { font-size: 1.5em; color: #333; }
+  .header-title a { color: inherit; text-decoration: none; }
+  .container { flex: 1; width: 100%; max-width: 760px; box-sizing: border-box; margin: 70px auto 0; padding: 0 20px 60px; }
+  .nav-link { margin: 10px 0 0; font-size: 0.95em; text-align: center; }
+  .nav-link a { color: #707070; }
+  .status { text-align: center; color: #707070; padding: 40px 0; }
+
+  .beach-header h1 { font-size: 1.5em; margin: 20px 0 4px; }
+  .alt-names { color: #707070; font-size: 0.95em; margin: 0 0 4px; }
+  .beach-location { color: #707070; margin: 0 0 12px; }
+  .beach-actions { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; font-size: 0.95em; }
+  .beach-actions a { color: #555; }
+
+  .beach-photos { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+  .beach-photos a { display: block; }
+  .beach-photos img { height: 110px; width: auto; border-radius: 10px; display: block; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+
+  .beach-description { font-size: 1.02em; line-height: 1.55; }
+  .beach-notes { color: #555; font-size: 0.95em; line-height: 1.5; border-left: 3px solid #e0e0e0; padding-left: 12px; }
+
+  section.facts { background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); padding: 16px 20px; margin: 16px 0; }
+  section.facts h2 { font-size: 1.05em; margin: 0 0 10px; }
+  dl.fact-grid { display: grid; grid-template-columns: minmax(140px, max-content) 1fr; gap: 6px 16px; margin: 0; font-size: 0.95em; }
+  dl.fact-grid dt { color: #707070; }
+  dl.fact-grid dd { margin: 0; }
+  dl.fact-grid dd a { color: #555; }
+
+  .service-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .service-tag { font-size: 0.85em; color: #555; background: #f1f1f1; border-radius: 999px; padding: 4px 11px; }
+  .service-tag.blue-flag { background: #e3edfb; color: #1a56a0; }
+
+  .source-note { color: #707070; font-size: 0.85em; margin-top: 20px; }
+  .source-note a { color: #707070; }
+
+  footer { padding: 20px 16px 32px; color: #707070; font-size: 0.85em; border-top: 1px solid #e5e5e5; text-align: center; }
+  footer a { color: #707070; }
+  footer p { margin: 6px 0; }
+  .social-link { display: inline-flex; vertical-align: middle; margin-left: 4px; color: #707070; }
+</style>
+</head>
+<body>
+<header>
+  <img src="images/ailoveyou-logo.png" alt="ailoveyou.ai Logo" class="header-logo" width="32" height="32">
+  <div class="header-title"><a href="/">ailoveyou.ai</a></div>
+</header>
+<main class="container">
+  <p class="nav-link"><a href="beaches.html">&larr; All beaches</a> &middot; <a href="/">Home</a></p>
+  <div id="detail"></div>
+  <div class="status" id="status">Loading&hellip;</div>
+</main>
+<footer>
+  <p>ailoveyou.ai &mdash; a little love, every day. <a href="https://www.instagram.com/ailoveyou_ai/" target="_blank" rel="noopener" aria-label="ailoveyou.ai on Instagram" class="social-link"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line></svg></a></p>
+  <p>Beach data: <a href="https://www.miteco.gob.es/" target="_blank" rel="noopener">MITECO Gu&iacute;a de Playas</a>, Spanish government open data.</p>
+  <p>Photos &copy; 2026 tusesiondesurf.com. All rights reserved.</p>
+</footer>
+<script type="module" src="js/beach-detail.js"></script>
+</body>
+</html>

@@ -83,14 +83,19 @@ function cardHtml(b) {
     })
     .join("");
 
+  const detailUrl = `beach.html?id=${encodeURIComponent(b.id)}`;
+
   return `<article class="beach-card" id="beach-${escapeHtml(b.id)}" data-beach-id="${escapeHtml(b.id)}">
-    <h2 class="beach-name">${escapeHtml(b.name)}</h2>
+    <h2 class="beach-name"><a href="${detailUrl}">${escapeHtml(b.name)}</a></h2>
     <div class="beach-location">${locationLine}</div>
     <p class="beach-desc">${escapeHtml(b.description)}</p>
     ${photos ? `<div class="beach-photos">${photos}</div>` : ""}
     ${meta ? `<div class="beach-meta">${meta}</div>` : ""}
     ${tags ? `<div class="beach-tags">${tags}</div>` : ""}
-    <a class="beach-map" href="${mapUrl}" target="_blank" rel="noopener">View on map &#8599;</a>
+    <div class="beach-links">
+      <a class="beach-details" href="${detailUrl}">Details &rarr;</a>
+      <a class="beach-map" href="${mapUrl}" target="_blank" rel="noopener">View on map &#8599;</a>
+    </div>
   </article>`;
 }
 

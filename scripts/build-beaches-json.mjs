@@ -20,6 +20,10 @@ const PARQUET_PATH = new URL("data/raw/beaches_clean.parquet", ROOT);
 const OUT_FULL_PATH = new URL("data/beaches-full.json", ROOT);
 // Slim public version fetched by beaches.html.
 const OUT_SLIM_PATH = new URL("data/beaches.json", ROOT);
+// Hand-maintained corrections applied on top of the parsed CSV data as the
+// final build step - never edit the raw MITECO CSV for one-off fixes.
+// Format: { "ES-000123": { "services.surfZone": true, ... }, ... }
+const OVERRIDES_PATH = new URL("data/beach-overrides.json", ROOT);
 const EXPECTED_ROWS = 3551;
 
 // ---------- CSV parsing (RFC 4180: quoted fields, "" escapes, BOM) ----------
@@ -451,6 +455,50 @@ function verifyJoin(csvRows, pqRows) {
   }
 }
 
+// ---------- Manual overrides ----------
+
+// Sets a dot-path field ("services.surfZone") on a beach object. Every path
+// segment, including the final key, must already exist in the schema - a
+// typo in the hand-edited overrides file must fail the build, not silently
+// add a new field.
+function setByPath(beach, id, path, value) {
+  const segments = path.split(".");
+  let target = beach;
+  for (const seg of segments.slice(0, -1)) {
+    if (target === null || typeof target !== "object" || !Object.hasOwn(target, seg)) {
+      console.error(`FATAL: override for ${id}: path "${path}" does not exist in the beach schema (at "${seg}").`);
+      process.exit(1);
+    }
+    target = target[seg];
+  }
+  const last = segments.at(-1);
+  if (target === null || typeof target !== "object" || !Object.hasOwn(target, last)) {
+    console.error(`FATAL: override for ${id}: path "${path}" does not exist in the beach schema (at "${last}").`);
+    process.exit(1);
+  }
+  target[last] = value;
+}
+
+// Returns [{ id, fieldCount }] for the build report.
+function applyOverrides(beaches) {
+  const overrides = JSON.parse(readFileSync(OVERRIDES_PATH, "utf8"));
+  const byId = new Map(beaches.map((b) => [b.id, b]));
+  const applied = [];
+  for (const [id, fields] of Object.entries(overrides)) {
+    const beach = byId.get(id);
+    if (!beach) {
+      console.error(`FATAL: data/beach-overrides.json references unknown beach id "${id}" - check for typos.`);
+      process.exit(1);
+    }
+    for (const [path, value] of Object.entries(fields)) setByPath(beach, id, path, value);
+    // Overridden fields feed embeddingText, so regenerate it - unless the
+    // override set embeddingText itself, in which case the explicit value wins.
+    if (!Object.hasOwn(fields, "embeddingText")) beach.embeddingText = buildEmbeddingText(beach);
+    applied.push({ id, fieldCount: Object.keys(fields).length });
+  }
+  return applied;
+}
+
 // ---------- Validation report ----------
 
 function countNulls(beaches) {
@@ -531,6 +579,16 @@ const ids = new Set(beaches.map((b) => b.id));
 if (ids.size !== beaches.length) {
   console.error("FATAL: duplicate beach ids in output.");
   process.exit(1);
+}
+
+const appliedOverrides = applyOverrides(beaches);
+if (appliedOverrides.length === 0) {
+  console.log("Manual overrides: none (data/beach-overrides.json is empty).");
+} else {
+  console.log(`Manual overrides applied to ${appliedOverrides.length} beach(es):`);
+  for (const { id, fieldCount } of appliedOverrides) {
+    console.log(`  ${id}: ${fieldCount} field(s)`);
+  }
 }
 
 function slimBeach(b) {

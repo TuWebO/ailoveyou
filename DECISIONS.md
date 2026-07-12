@@ -2,6 +2,14 @@
 
 Records of project decisions that need to survive until the milestone that acts on them.
 
+## Beach data corrections
+
+Manual corrections go in `data/beach-overrides.json`, applied on top of parsed CSV
+data at build time — never edit `data/raw/playas_espanolas.csv` directly for one-off
+fixes. Overrides are keyed by beach id with dot-path fields
+(`{ "ES-000123": { "services.surfZone": true } }`); the build fails loudly on unknown
+ids or paths, and regenerates the affected beach's embeddingText.
+
 ## Embedding language strategy (decided before M4)
 
 - embeddingText fields are written in each beach's local/source language — Spanish
